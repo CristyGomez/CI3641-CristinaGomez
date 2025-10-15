@@ -1,0 +1,478 @@
+Cristina Gómez
+19-10266
+Examen 1
+Pregunta 2(b) 
+    Alcance dinámico y asociación profunda
+
+Valores iniciales
+X = 2, Y = 6, Z = 6
+
+Valores Globales:
+a = Y + Z + 1 = 13
+b = X + Y + 1 = 9
+c = Z + Y + 1 = 13
+
+
+Paso 1 - Estado inicial antes de la llamada P(a, Q, R)
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 9        |
+|   c = 13       |
+|   Sub R()      -> a := b + c - 1
+|   Sub Q()      -> {b := a + 1, r(c)}
+|   Sub P()      -> procedimiento principal
+__________________
+
+    - Ahora se realiza la primera llamada a Sub P() es decir
+        P(a, Q, R)
+        P(13, Q, R)
+
+Paso 2 - Crear el primer marco de pila de Sub P()
+
+________P0_______
+|   a= 13        |
+|   s= Q global  |
+|   t= R global  |
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 22       -> c = a + b
+__________________
+
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 9        |
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+    - Se define una Sub Q y Sub R interna de P0
+    - Se evalua la condición if (a < 2 * (Y + Z + 1))
+        13 < 26 (entra en la condición)
+
+Paso 3 - Se llama recursivamente a P()
+    P(a + 2 * (Y + Z + 1), s, R)
+    P(39, s = Q_global, t = R_local_p0)
+
+________P1_______
+|   a= 39        |
+|   s= Q global  |
+|   t= R local_p0|
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 48       -> c = a + b (39 + 9)
+|   int a = 49   -> a local de p1 (porque entra en el else)
+__________________
+
+________P0_______
+|   a= 13        |
+|   s= Q global  |
+|   t= R global  |
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 22       |
+__________________
+
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 9        |
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+
+    - Se define una Sub Q y Sub R interna de P1
+    - Se evalua la condición if (a < 2 * (Y + Z + 1))
+        39 < 26 (NO entra en la condición)
+entonces
+    - Se crea una a local int a := c + 1
+        a = 49
+
+Paso 4 - Entra en else 
+    - Se ejecuta s(c * a, R) donde s sería Q global
+        Q(int a, sub r) a = 2352 r = R local de p1
+        Q(2352, R)
+
+______Qglobal_____
+|   a= 2352      |
+|   r= R local_p1|
+|   b = 2353     -> b = a + 1 (se modifica la b global)
+|   r(c)         -> c = 13
+__________________
+
+________P1_______
+|   a= 39        |
+|   s= Q global  |
+|   t= R local_p0|
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 48       |
+|   int a = 49   |
+__________________
+
+________P0_______
+|   a= 13        |
+|   s= Q global  |
+|   t= R global  |
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 22       |
+__________________
+
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 2353        -> (se modifica la b global)
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+
+    - Busca b dinámicamente, no es local de Q, no es local de P1 (no existe b allí),
+    no es local de P0, entonces b global = 9 y lo modifica a 2353.
+    r(c) => R(int a)=> R(48)
+    
+
+Paso 5 - Se llama la subrutina R local de P1
+
+______Rlocal_p1___
+|   a= 48         -> a local ya que entra como parametro
+|   b = 97     -> b = c + a + 1 (c es local de P1, y se modifica la b global)
+__________________
+    
+______Qglobal_____
+|   a= 2352      |
+|   r= R local_p1|
+|   b = 2353     |
+|   r(c)         |
+__________________
+
+________P1_______
+|   a= 39        |
+|   s= Q global  |
+|   t= R local_p0|
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 48       |
+|   int a = 49   |
+__________________
+
+________P0_______
+|   a= 13        |
+|   s= Q global  |
+|   t= R global  |
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 22       |
+__________________
+
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 97        -> (se modifica la b global)
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+
+    - En R(int a) {b = c + a + 1} b es global
+    - Se busca c dinámicamente, no es local de Q, es local de P1, por lo que, c local de P1 = 48.
+    Entonces c = 48.
+
+Paso 6 - Retorna r(c) y termina Qglobal (S(c * a, R))
+
+________P1_______
+|   a= 39        |
+|   s= Q global  |
+|   t= R local_p0|
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 48       |
+|   int a = 49   |
+__________________
+
+________P0_______
+|   a= 13        |
+|   s= Q global  |
+|   t= R global  |
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 22       |
+__________________
+
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 97       |
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+
+    - Continuamos con la ejecución de p1 con la llamada a Q(c * b, t)
+    - Se ejecuta Q(c * b, t) donde t sería R local de P0
+        Q(int b, sub r) donde b = c * b = 48 * 97 = 4656 | r = R local de p0
+        Q(4656, R)
+
+Paso 7 - Llamada a la sub Q (local de p1)
+
+______Qlocal_p1___
+|   b = 4656     -> b local ya que entra como parametro
+|   r = R local_p0 
+|   c = 4695      -> se modifica c local de P1 
+|   r(4734)       -> r (c + a) donde a = 39
+__________________
+
+________P1_______
+|   a= 39        |
+|   s= Q global  |
+|   t= R local_p0|
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 4695       -> c es modificada por Q local P1
+|   int a = 49   |
+__________________
+
+________P0_______
+|   a= 13        |
+|   s= Q global  |
+|   t= R global  |
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 22       |
+__________________
+
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 97       |
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+
+    - Busca a dinámicamente, ya que en Q local no existe, en P1 sí, el parámetro a = 39 (no el a interno 49, porque ese bloque ya terminó al salir del bloque else).
+    - c es local de P1 ya que Q local se definió en P1 y P1 tiene c local.
+
+Paso 8 - Llamada a r(c + a) que es la sub R (local de p0)
+    R(int a)
+    R(4734)
+
+______Rlocal_p0___
+|   a = 4734      -> Entra como parametro
+|   b = 4757      -> b = c + a + 1 (se modifica la b global)
+__________________
+
+______Qlocal_p1___
+|   b = 4656      |
+|   r = R local_p0|
+|   c = 4695      |
+|   r(1374)       |
+__________________
+
+________P1_______
+|   a= 39        |
+|   s= Q global  |
+|   t= R local_p0|
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 4695     |
+|   int a = 49   |
+__________________
+
+________P0_______
+|   a= 13        |
+|   s= Q global  |
+|   t= R global  |
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 22       |
+__________________
+
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 4757        -> (se modifica la b global)
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+
+    -Retornamos de r(c + a) y continuamos con Q local de p1
+    -Y ahora hacemos llamado a t(c + b) que sería R local de P0 (c local de P1 es 4695, y b parametro de Q 4656)
+    R(int a)
+    R(9351)
+
+Paso 9 - Llamada a t(c + b) que es la sub R (local de p0)
+
+______Rlocal_p0___
+|   a = 9452      -> Entra como parametro
+|   b = 14148      -> b = c + a + 1 (se modifica la b global)
+__________________
+
+______Qlocal_p1___
+|   b = 1296      |
+|   r = R local_p0|
+|   c = 1335      |
+|   r(1374)       |
+__________________
+
+________P1_______
+|   a= 39        |
+|   s= Q global  |
+|   t= R local_p0|
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 4695     |
+|   int a = 49   |
+__________________
+
+________P0_______
+|   a= 13        |
+|   s= Q global  |
+|   t= R global  |
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 22       |
+__________________
+
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 14148        -> (se modifica la b global)
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+
+    - Termina t(c + b)
+    - Termina Q(c * b, t)
+    - Continua con la ejecución de p1
+
+Paso 10 - Se realiza el primer print(a, b, c) de P1
+
+________P1_______
+|   a= 39        |
+|   s= Q global  |
+|   t= R local_p0|
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 4695     |
+|   int a = 49   |
+__________________
+
+________P0_______
+|   a= 13        |
+|   s= Q global  |
+|   t= R global  |
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 22       |
+__________________
+
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 2737     |
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+
+El cual imprime:
+a = 39 (no es 49 ya que ese a es interno del else y ese bloque ya ha terminado), entonces se imprime a parametro a = 39
+b = 14148 que es la b global
+c = 4695 el cual es local de P1
+
+Paso 11 - Retornamos a P0, volviendo de la recursion
+    En este caso, no pasamos por el else, por lo que vamos directo al print
+
+________P0_______
+|   a= 13        |
+|   s= Q global  |
+|   t= R global  |
+|   Sub Q()      |
+|   Sub R()      |
+|   c = 22       |
+__________________
+
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 14148     |
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+
+Paso 12 - Se realiza el segundo print(a, b, c) de P0
+El cual imprime:
+a = 13 que es a global ya que P0 recibe a global por parametro
+b = 14148 que es la b global
+c = 22 que es c local de P0
+
+Paso 13 - Termina de ejecutarse P0 y el programa continua hasta el útlimo print
+__________________
+|   global       |
+|   X = 2        |
+|   Y = 6        |
+|   Z = 6        |
+|   a = 13       |
+|   b = 14148     |
+|   c = 13       |
+|   Sub R()      |
+|   Sub Q()      |
+|   Sub P()      |
+__________________
+
+Se realiza el tercer y útlimo print(a, b, c) del main
+El cual imprime:
+a = 13 global
+b = 14148 global
+c = 13 global
+
