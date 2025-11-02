@@ -5,7 +5,7 @@ Para esta pregunta, gracias al go.mod,
 ``` 
     go run Pregunta2.go
 ```
-&emsp;Para lograr los test 
+&emsp;Para lograr correr los test 
 ``` 
     go test
 ```
